@@ -2,7 +2,7 @@ name: drails_di
 version: 0.0.1
 author: Luis Vargas <luisvargastijerino@gmail.com>
 description: Drails Dependency Injection Manager
-homepage: https://github.com/luisvt/Drails/tree/master/drails_di
+homepage: https://github.com/luisvt/Drails/drails_di
 environment:
   sdk: '>=1.6.0'
 dependencies:
