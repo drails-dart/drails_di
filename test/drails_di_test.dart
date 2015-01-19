@@ -34,15 +34,13 @@ class SomeServiceImpl extends SomeService {
 }
 
 class SomeController {
-  @autowired
-  SomeService someService;
+  @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
 abstract class InjectedService {
-  @autowired
-  SomeService someService;
+  @autowired SomeService someService;
   
   String sayHi() => "hi ";
 }
