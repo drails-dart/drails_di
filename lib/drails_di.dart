@@ -6,3 +6,4 @@ import 'dart:mirrors';
 
 part 'src/application_context.dart';
 part 'src/annotations.dart';
+part 'src/aop_proxy.dart';

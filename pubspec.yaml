@@ -1,5 +1,5 @@
 name: drails_di
-version: 0.0.1+1
+version: 0.0.2
 author: Luis Vargas <luisvargastijerino@gmail.com>
 description: Drails Dependency Injection Manager
 homepage: https://github.com/luisvt/drails_di
@@ -7,3 +7,5 @@ environment:
   sdk: '>=1.6.0'
 dependencies:
   drails_commons: '>=0.0.1 <0.0.3'
+dev_dependencies:
+  unittest: '>=0.11.0+5 <0.12.0'
