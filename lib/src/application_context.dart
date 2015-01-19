@@ -35,8 +35,8 @@ class ApplicationContext {
     CONTROLLER_NAMES.addAll(_CONTROLLER_NAMES);
     COMPONENT_NAMES..addAll(_COMPONENT_NAMES)..addAll(CONTROLLER_NAMES);
     var dms = [];
-    includedLibs.forEach((inclibrary) {
-      var libs = currentMirrorSystem().findLibrary(inclibrary).declarations.values.where((dm) => dm is ClassMirror);
+    includedLibs.forEach((incLibrary) {
+      var libs = currentMirrorSystem().findLibrary(incLibrary).declarations.values.where((dm) => dm is ClassMirror);
       dms.addAll(libs);
     });
     
@@ -64,5 +64,4 @@ class ApplicationContext {
       });
     });
   }
-  
 }
