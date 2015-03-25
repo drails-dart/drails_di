@@ -1,11 +1,12 @@
 part of drails_di;
 
 /**
- * Annotation that indicates that the variable is going to be injected 
+ * Indicates that the variable is going to be injected 
  * using the Type as reference
  */
-const autowired = const _Autowired();
+const inject = const _Inject(), 
+      autowired = inject;
 
-class _Autowired {
-  const _Autowired();
+class _Inject {
+  const _Inject();
 }

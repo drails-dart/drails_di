@@ -1,29 +1,30 @@
-library drails_di_test;
+library drails_di_aop_proxy_test;
 
 import 'package:drails_di/drails_di.dart';
 import 'package:unittest/unittest.dart';
 
 main() {
-  group('Simple Test ->', () {
+  group('AopProxy Test ->', () {
+
     setUp(() {
-      ApplicationContext.bootstrap([#drails_di_test]);
+      ApplicationContext.bootstrap([#drails_di_aop_proxy_test]);
     });
-    
+  
     test('SomeService', () {
-      SomeService someService = extract(SomeService);
-      expect(someService is SomeService, true, reason: 'someService should be SomeService');
+      SomeService someService = ApplicationContext.components[SomeService];
+      expect(someService is SomeServiceAopProxy, true, reason: 'someService should be AopProxy');
       
       expect(someService.sayHello(), "hello impl");
       
-      SomeController someController = extract(SomeController);
-      expect(someController.someService is SomeService, true);
+      SomeController someController = ApplicationContext.components[SomeController];
+      expect(someController.someService is SomeServiceAopProxy, true);
       
     });
     
     test('InjectedService', () {
-      InjectedService injectedService = extract(InjectedService);
+      InjectedService injectedService = ApplicationContext.components[InjectedService];
       expect(injectedService is InjectedServiceImpl, true);
-      expect(injectedService.someService is SomeServiceImpl, true);
+      expect(injectedService.someService is SomeServiceAopProxy, true);
       expect(injectedService.sayHi(), "hi hello impl");
     });
   });
@@ -35,6 +36,11 @@ abstract class SomeService {
 
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
+}
+
+class SomeServiceAopProxy extends AopProxy implements SomeService { 
+  noSuchMethod(invocation) =>
+    super.noSuchMethod(invocation);
 }
 
 class SomeController {

@@ -2,7 +2,7 @@ part of drails_di;
 
 class AopProxy {
   noSuchMethod(Invocation invocation) {
-    var component = ApplicationContext.componentOfProxy[reflect(this).type.reflectedType];
+    var component = ApplicationContext._componentOfProxy[reflect(this).type.reflectedType];
     
     if(invocation.isGetter)
       return reflect(component).getField(invocation.memberName).reflectee;
