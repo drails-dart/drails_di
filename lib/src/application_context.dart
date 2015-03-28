@@ -25,10 +25,13 @@ class ApplicationContext {
   
   /// Contains a map that link every component to its respective proxy
   static Map<Type, Object> _componentOfProxy = {};
+  
+  static Map<MethodMirror, LibraryMirror> _aspectsBefore = {};
+  static Map<MethodMirror, LibraryMirror> _aspectsAfter = {};
+  static Map<MethodMirror, LibraryMirror> _aspectsAfterFinally = {};
+  static Map<MethodMirror, LibraryMirror> _aspectsAfterThrowing = {};
 
-  /**
-   * Get the controllers from the application Context
-   */
+  /// Get the controllers from the application Context
   static Iterable<Object> get controllers {
     return components.values.where((component) => CONTROLLER_NAMES.any((name) => 
       MirrorSystem.getName(reflect(component).type.simpleName).endsWith(name))
@@ -48,10 +51,37 @@ class ApplicationContext {
     
     CONTROLLER_NAMES.addAll(_CONTROLLER_NAMES);
     COMPONENT_NAMES..addAll(_COMPONENT_NAMES)..addAll(CONTROLLER_NAMES);
-    List<DeclarationMirror> dms = [];
-    includedLibs.forEach((incLibrary) {
-      var libs = currentMirrorSystem().findLibrary(incLibrary).declarations.values.where((dm) => dm is ClassMirror);
-      dms.addAll(libs);
+    
+    List<ClassMirror> cms = [];
+    List<MethodMirror> mms = [];
+    
+    includedLibs.forEach((incLibrarySymbol) {
+      LibraryMirror incLibrary = currentMirrorSystem().findLibrary(incLibrarySymbol);
+      var dms = incLibrary.declarations.values;
+      dms.forEach((dm) {
+        if(dm is ClassMirror) {
+          cms.add(dm);
+          return;
+        }
+        if(dm is MethodMirror) {
+          if(new IsAnnotation<Before>().onDeclaration(dm)) {
+            _aspectsBefore[dm] = incLibrary;
+            return;
+          }
+          if(new IsAnnotation<After>().onDeclaration(dm)) {
+            _aspectsAfter[dm] = incLibrary;
+            return;
+          }
+          if(new IsAnnotation<AfterFinally>().onDeclaration(dm)) {
+            _aspectsAfterFinally[dm] = incLibrary;
+            return;
+          }
+          if(new IsAnnotation<AfterThrowing>().onDeclaration(dm)) {
+            _aspectsAfterThrowing[dm] = incLibrary;
+            return;
+          }
+        }
+      });
     });
     
     var proxyOfComponent = {};
@@ -59,7 +89,7 @@ class ApplicationContext {
     /// Contains the proxies of the components
     Map<Type, Object> proxies = {};
 
-    dms.where((dm) =>
+    cms.where((dm) =>
       MirrorSystem.getName(dm.simpleName).endsWith('AopProxy')
     ).forEach((ClassMirror injectableProxyCm) {
         var componentType = injectableProxyCm.superinterfaces.first.reflectedType;
@@ -68,7 +98,7 @@ class ApplicationContext {
     });
     
     //Get Components' instances
-    dms.where((dm) => 
+    cms.where((dm) => 
       COMPONENT_NAMES.any((name) => MirrorSystem.getName(dm.simpleName).endsWith(name))
     ).forEach((ClassMirror injectableCm) {
       var componentType = injectableCm.reflectedType;
@@ -78,11 +108,11 @@ class ApplicationContext {
           
           components[componentType] = proxies[injectableCm.reflectedType];
           _componentOfProxy[proxyOfComponent[componentType]] = injectableCm.isAbstract 
-              ? getObjectThatExtend(injectableCm, dms)
+              ? getObjectThatExtend(injectableCm, cms)
               : injectableCm.newInstance(const Symbol(''), []).reflectee;
         } else {
           components[componentType] = injectableCm.isAbstract 
-                ? getObjectThatExtend(injectableCm, dms)
+                ? getObjectThatExtend(injectableCm, cms)
                 : injectableCm.newInstance(const Symbol(''), []).reflectee;
         }
       }

@@ -1,7 +1,10 @@
 # Todo
 
-* aop_proxy support
 * Enhance Documentation
+
+# v0.0.5
+
+* aop_proxy support
 
 # v0.0.4
 

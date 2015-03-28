@@ -155,7 +155,7 @@ class SomeController {
 }
 
 abstract class InjectedService {
-  //
+
   @inject SomeService someService;
   
   String sayHi() => "hi ";
