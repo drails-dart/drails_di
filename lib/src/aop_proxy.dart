@@ -85,7 +85,7 @@ class AopProxy {
     } finally {
       //AfterFinally begin
       ApplicationContext._aspectsAfterFinally.keys.where((aspect) =>
-        new GetValueOfAnnotation<AfterFinally>().fromDeclaration(aspect).pointCut(component, invocation)
+        new GetValueOfAnnotation<AfterFinally>().fromDeclaration(aspect).isAfterFinally(component, invocation)
       ).forEach((mm) {
         retVal = ApplicationContext._aspectsAfterFinally[mm].invoke(mm.simpleName, [retVal]).reflectee;
       });
