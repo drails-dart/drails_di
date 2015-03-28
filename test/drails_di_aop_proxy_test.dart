@@ -2,7 +2,6 @@ library drails_di_aop_proxy_test;
 
 import 'package:drails_di/drails_di.dart';
 import 'package:unittest/unittest.dart';
-import 'dart:mirrors';
 
 main() {
   group('AopProxy Test ->', () {
@@ -76,8 +75,8 @@ class InjectedServiceImpl extends InjectedService {
 
 var beforeCounter = 0;
 
-bool SomeService_sayHello(InstanceMirror im, Invocation inv) =>
-    im.reflectee is SomeService
+bool SomeService_sayHello(component, Invocation inv) =>
+    component is SomeService
     && inv.memberName == #sayHello;
 
 @Before(SomeService_sayHello)
@@ -88,7 +87,10 @@ increaseBeforeCounter() {
 
 var afterCounter = 0;
 
-@After(SomeService_sayHello)
+someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
+    SomeService_sayHello(component, inv);
+
+@After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
   print("after sayHello $afterCounter");
@@ -96,7 +98,10 @@ increaseAfterCounter(retVal) {
   return retVal;
 }
 
-@After(SomeService_sayHello, retValNull: true)
+someService_sayHello_retValNull(component, Invocation inv, retVal) =>
+    retVal == null && SomeService_sayHello(component, inv);
+
+@After(someService_sayHello_retValNull)
 noIncreaseAfterCounter(retVal) {
   //this should not happens
   afterCounter++;
@@ -107,7 +112,10 @@ noIncreaseAfterCounter(retVal) {
 
 var afterCounter2 = 0;
 
-@After(SomeService_sayHello, retVal: "hello impl")
+someService_sayHello_retVal(component, Invocation inv, retVal) =>
+    retVal == "hello impl" && SomeService_sayHello(component, inv);
+
+@After(someService_sayHello_retVal)
 increaseAfterCounter2(retVal) {
   afterCounter2++;
   print("after sayHello 2 $afterCounter2");
@@ -117,13 +125,13 @@ increaseAfterCounter2(retVal) {
 
 var afterTrhowingCounter = 0;
 
-SomeService_throwinError(InstanceMirror im, Invocation inv, ex) =>
+SomeService_throwinError(component, Invocation inv, ex) =>
     ex is Exception
-    && im.reflectee is SomeService
+    && component is SomeService
     && inv.memberName == #throwsError;
 
 @AfterThrowing(SomeService_throwinError)
-increaseAfterThrowingCounter(ex) {
+increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;
   print("after throwing $afterTrhowingCounter");
   print(ex);
