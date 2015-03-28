@@ -12,8 +12,8 @@ class _Inject {
 }
 
 /// Defines the type of function that should be used for creating the
-/// interception logic.
-typedef bool PointCutFunc(InstanceMirror im, Invocation invo);
+/// interception logic for [Before] and [AfterFinally] apects.
+typedef bool PointCutFunc(component, Invocation invo);
 
 /// Indicates that the annotated function should be executed before
 /// the execution of [isBefore]
@@ -23,32 +23,34 @@ class Before {
   final PointCutFunc isBefore;
 }
 
+/// Defines the type of function that should be used for creating the
+/// interception logic for [After] aspects
+typedef bool AfterFunc(component, Invocation invo, retVal);
+
 /// Indicates that the annotated function should be executed after
 /// the execution of the [isAfter]
 class After {
-  const After(this.isAfter, {this.retVal, this.retValNull: false});
+  const After(this.isAfter);
 
-  final PointCutFunc isAfter;
-  final retVal;
-  final bool retValNull;
+  final AfterFunc isAfter;
 }
 
-typedef bool AfterThrowingFunc(InstanceMirror im, Invocation invo, Exception ex);
+/// Defines the type of function that should be used for creating the
+/// interception logic for [AfterThrowing] aspects
+typedef bool AfterThrowingFunc(component, Invocation invo, Exception ex);
 
 /// Indicates that the annotated function should be executed after
 /// the execution of the [isAfterThrowing] that throws a exeption [exceptionType]
 class AfterThrowing {
-  const AfterThrowing(this.isAfterThrowing, [this.exceptionType = #Exception]);
+  const AfterThrowing(this.isAfterThrowing);
   
   final AfterThrowingFunc isAfterThrowing;
-  final Symbol exceptionType;
 }
 
 /// Indicates that the annotated function should be executed after
-/// the execution of the [pointCut] with [retVal]
+/// the execution of the [isAfterFinally]
 class AfterFinally {
-  const AfterFinally(this.pointCut, this.retVal);
+  const AfterFinally(this.isAfterFinally);
   
-  final PointCutFunc pointCut;
-  final retVal;
+  final PointCutFunc isAfterFinally;
 }
