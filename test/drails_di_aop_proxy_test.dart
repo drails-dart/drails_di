@@ -80,9 +80,10 @@ bool SomeService_sayHello(component, Invocation inv) =>
     && inv.memberName == #sayHello;
 
 @Before(SomeService_sayHello)
-increaseBeforeCounter() {
+increaseBeforeCounter(invocation) {
   beforeCounter++;
   print("before sayHello $beforeCounter");
+  return invocation;
 }
 
 var afterCounter = 0;
