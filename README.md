@@ -166,3 +166,150 @@ class InjectedServiceImpl extends InjectedService {
 }
 ```
 
+## Aspect Oriented Programing
+
+> In computing, aspect-oriented programming (AOP) is a programming paradigm that aims to increase modularity by allowing the separation of cross-cutting concerns.
+
+> http://en.wikipedia.org/wiki/Aspect-oriented_programming
+
+To be able to use AOP with Drails_DI you need to extend the `AopProxy` class and implement the proxied method. For example, let say you have next class:
+
+```dart
+
+abstract class SomeService {
+  String sayHello() => "hello";
+  
+  throwsError() => throw new Exception("message");
+}
+```
+
+and you have an implementation:
+
+```dart
+class SomeServiceImpl extends SomeService {
+  String sayHello() => "${super.sayHello()} impl";
+}
+```
+
+then to make that component interceptable you need to create an `AopProxy` class:
+```dart
+class SomeServiceAopProxy extends AopProxy implements SomeService { 
+  noSuchMethod(invocation) =>
+    super.noSuchMethod(invocation);
+}
+```
+
+finally you only need to create the aspects/interceptors. To do this you need to create two things: the pointCut and the execution method. In Drails_DI this is doing by mean of top level functions. 
+
+### Before
+
+Before Aspects should be executed before to the pointCut. For example if I want to intercept the method `SomeService.sayHello` before it occurs, I could do:
+
+```dart
+var beforeCounter = 0;
+
+// PointCut
+bool SomeService_sayHello(component, Invocation inv) =>
+    component is SomeService
+    && inv.memberName == #sayHello;
+
+// Aspect
+@Before(SomeService_sayHello)
+// execution method
+increaseBeforeCounter() {
+  beforeCounter++;
+  print("before sayHello $beforeCounter");
+}
+```
+
+In the previous example I'm telling that the method `increaseBeforeCounter` is going to be executed always that the result of the method `SomeService_sayHello` is true. Since this method is true whenever the `component` (in this case `SomeService` singleton object created by Drails_DI) is `SomeService` type and the invoked member name is `sayHello`.
+
+As you can see the execution method `increaseBeforeCounter` should have as parameter `invocation` which could be modified before executing the intercepted method.
+
+### After
+
+After Aspects should be executed after to the pointCut. For example if I want to intercept the method `SomeService.sayHello` after it occurs, I could do:
+
+```dart
+var afterCounter = 0;
+
+someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
+    SomeService_sayHello(component, inv);
+
+@After(someService_sayHello_noRetVal)
+increaseAfterCounter(retVal) {
+  afterCounter++;
+  print("after sayHello $afterCounter");
+  print(retVal);
+  return retVal;
+}
+```
+
+In the previous example I'm telling that the method `increaseAfterCounter` is going to be executed always the result of the method `SomeService_sayHello_noRetVal` is true. This method is true whenever the function `SomeService_sayHello` is true.
+
+As you can see the execution method `increaseAfterCounter` should have as parameter `retVal` which could be modified before executing the intercepted method and should be returned to continue with the process.
+
+You can also check if the returned Value `retVal` accomplish certain criteria:
+
+```dart
+var afterCounter2 = 0;
+
+someService_sayHello_retVal(component, Invocation inv, retVal) =>
+    retVal == "hello impl" && SomeService_sayHello(component, inv);
+
+@After(someService_sayHello_retVal)
+increaseAfterCounter2(retVal) {
+  afterCounter2++;
+  print("after sayHello 2 $afterCounter2");
+  print(retVal);
+  return retVal;
+}
+```
+In the previous example I'm telling that the method `increaseAfterCounter` is going to be executed always the result of the method `SomeService_sayHello_noRetVal` is true. This method is true whenever `retVal` is equal to `"hello impl"` and the function `SomeService_sayHello` is true.
+
+### AfterThrowing
+
+AfterThrowing Aspects should be executed after the pointCut has throwed an exception. For example if I want to intercept the method `SomeService.sayHello` after it throws an exception, I could do:
+
+```dart
+var afterTrhowingCounter = 0;
+
+SomeService_throwinError(component, Invocation inv, ex) =>
+    ex is Exception
+    && component is SomeService
+    && inv.memberName == #throwsError;
+
+@AfterThrowing(SomeService_throwinError)
+increaseAfterThrowingCounter(retVal, Exception ex) {
+  afterTrhowingCounter++;
+  print("after throwing $afterTrhowingCounter");
+  print(ex);
+  throw ex;
+}
+```
+
+In the previous example I'm telling that the method `increaseAfterThrowingCounter` is going to be executed always that the result of the method `SomeService_throwinError` is true. Since this method is true whenever the exception throwed `ex` is `Exception`, the `component` is `SomeService`, and the invoked member name is `sayHello`.
+
+As you can see the execution method `increaseAfterThrowingCounter` should have as parameter the returned value `retVal` and the exception `ex` which could be modified before executing the intercepted method.
+
+
+### AfterFinally
+
+AfterFinally Aspects should be executed after the pointCut has throwed an exception. For example if I want to intercept the method `SomeService.sayHello` after it throws an exception, I could do:
+
+```dart
+var afterFinallyCounter = 0;
+
+@AfterFinally(SomeService_sayHello)
+increaseAfterFinallyCounter(retVal) {
+  afterFinallyCounter++;
+  print("after sayHello finally $afterFinallyCounter");
+  print(retVal);
+  return retVal;
+}
+```
+
+In the previous example I'm telling that the method `increaseAfterFinallyCounter` is going to be executed always that the result of the method `SomeService_sayHello` is true. Since this method is true whenever the `component` is `SomeService`, and the invoked member name is `sayHello`.
+
+As you can see the execution method `increaseAfterFinallyCounter` should have as parameter the returned value `retVal` which could be modified before executing the intercepted method.
+
