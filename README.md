@@ -4,7 +4,7 @@ This library maintains the dependency injection of drails. It also can be used o
 
 ## Dependency Injection
 
-The framework  wires classes with postfix: `Controller`, `Service`, and `Repository`. For example, you can create a abstract class named 'SomeService':
+The framework  wires classes with postfix: `Controller`, `Service`, and `Repository`. For example, we can create an abstract class named 'SomeService':
 
 ```dart
 abstract class SomeService {
@@ -24,7 +24,7 @@ finally to inject a component we use the annotation `@autowire` or the annotatio
 
 ```dart
 class SomeController {
-  // we inject the service SomeService from the ApplicationContest.components map
+  // we inject the service SomeService from the ApplicationContext.components map
   // you can use @autowire as well
   @inject SomeService someService;
   
@@ -33,7 +33,7 @@ class SomeController {
 }
 ```
 
-in that way whenever a controller has a variable of Type SomeService and is annotated with @autowired the framework is going to inject SomeServiceImpl into the controller.
+in that way whenever a controller has a variable of Type SomeService and is annotated with `@autowired` or `@inject` the framework is going to inject SomeServiceImpl into the controller.
 
 If you have a third level class that implements or extends SomeService this class is going to be used doubt to the level.
 
@@ -62,9 +62,10 @@ class SomeController {
 }
 
 main() {
-  // initialize the 
+  // initialize the application
   ApplicationContext.bootstrap([#drails_di_test]);
   
+  // we use function extract to get SomeServiceImpl
   SomeService someService = extract(SomeService);
   expect(someService is SomeService, true, reason: 'someService should be SomeService');
   someService.sayHello(); // prints "hello impl"
@@ -75,11 +76,11 @@ main() {
 }
 ```
 
-As you can see in the previous example the first parameter passed to `ApplicationContest.bootstrap` is the symbol of the library where we are going to scan for components. However you can also pass a second parameter call `bind`. This parameter is a map that contains the manual wiring. You are going to see this in action in next section.
+As you can see in the previous example the first parameter passed to `ApplicationContext.bootstrap` is the symbol of the library where we are going to scan for components. However you can also pass a second parameter call `bind`. This parameter is a map that contains the manual wiring (You are going to see this in action in next section).
 
 ## Mocking Components using Dart Mockito library
 
-Although you can use any Mock library, I recomend the use of Mockito since its power and versatility.
+>Although you can use any Mock library, I recomend the use of Mockito since its power and versatility.
 
 During unit testing one important feature is mocking components (Create fakes components that acts as the reals components). In that way we can decouple every stage of the application, and be sure that we are only testing one module at a time. This is specially useful when we call remote web-service or endpoints. In this way our test doesn't depends on third party data that could change during the time making our test invalid. For example:
 
