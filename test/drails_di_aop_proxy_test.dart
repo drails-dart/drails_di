@@ -1,13 +1,13 @@
 library drails_di_aop_proxy_test;
 
 import 'package:drails_di/drails_di.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 main() {
   group('AopProxy Test ->', () {
 
     setUp(() {
-      ApplicationContext.bootstrap([#drails_di_aop_proxy_test]);
+      ApplicationContext.bootstrap(['drails_di_aop_proxy_test']);
     });
   
     test('SomeService', () {
@@ -42,33 +42,39 @@ main() {
   });
 }
 
+@component
 abstract class SomeService {
   String sayHello() => "hello";
   
   throwsError() => throw new Exception("message");
 }
 
+@component
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
+@component
 class SomeServiceAopProxy extends AopProxy implements SomeService { 
   noSuchMethod(invocation) =>
     super.noSuchMethod(invocation);
 }
 
+@component
 class SomeController {
   @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
+@component
 abstract class InjectedService {
   @inject SomeService someService;
   
   String sayHi() => "hi ";
 }
 
+@component
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }
@@ -79,6 +85,7 @@ bool SomeService_sayHello(component, Invocation inv) =>
     component is SomeService
     && inv.memberName == #sayHello;
 
+@component
 @Before(SomeService_sayHello)
 increaseBeforeCounter(invocation) {
   beforeCounter++;
@@ -91,6 +98,7 @@ var afterCounter = 0;
 someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
     SomeService_sayHello(component, inv);
 
+@component
 @After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
@@ -102,6 +110,7 @@ increaseAfterCounter(retVal) {
 someService_sayHello_retValNull(component, Invocation inv, retVal) =>
     retVal == null && SomeService_sayHello(component, inv);
 
+@component
 @After(someService_sayHello_retValNull)
 noIncreaseAfterCounter(retVal) {
   //this should not happens
@@ -116,6 +125,7 @@ var afterCounter2 = 0;
 someService_sayHello_retVal(component, Invocation inv, retVal) =>
     retVal == "hello impl" && SomeService_sayHello(component, inv);
 
+@component
 @After(someService_sayHello_retVal)
 increaseAfterCounter2(retVal) {
   afterCounter2++;
@@ -131,6 +141,7 @@ SomeService_throwinError(component, Invocation inv, ex) =>
     && component is SomeService
     && inv.memberName == #throwsError;
 
+@component
 @AfterThrowing(SomeService_throwinError)
 increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;

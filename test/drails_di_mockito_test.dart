@@ -1,7 +1,7 @@
 library drails_di_mockito_test;
 
 import 'package:drails_di/drails_di.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
 main() {
@@ -9,7 +9,7 @@ main() {
 
     setUp(() {
       //We initialize the application
-      ApplicationContext.bootstrap([#drails_di_mockito_test],
+      ApplicationContext.bootstrap(['drails_di_mockito_test'],
           bind: {
             //bind SomeService Manually, stopping autowiring
             SomeService: new SomeServiceMock()
@@ -45,21 +45,25 @@ main() {
   });
 }
 
+@component
 abstract class SomeService {
   String sayHello() => "hello";
 }
 
+@component
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
 // we declare the Mock service
+@component
 class SomeServiceMock extends Mock implements SomeService { 
   //this method could be ommited, but I don't like to see the warning.
   noSuchMethod(invocation) =>
     super.noSuchMethod(invocation);
 }
 
+@component
 class SomeController {
   // we inject SomeService instance to SomeController
   @autowired SomeService someService;
@@ -68,6 +72,7 @@ class SomeController {
   String sayHello() => someService.sayHello();
 }
 
+@component
 abstract class InjectedService {
   //
   @inject SomeService someService;
@@ -75,6 +80,7 @@ abstract class InjectedService {
   String sayHi() => "hi ";
 }
 
+@component
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }

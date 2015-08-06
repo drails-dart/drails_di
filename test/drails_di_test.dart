@@ -1,12 +1,12 @@
 library drails_di_test;
 
 import 'package:drails_di/drails_di.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 main() {
   group('Simple Test ->', () {
     setUp(() {
-      ApplicationContext.bootstrap([#drails_di_test]);
+      ApplicationContext.bootstrap(['drails_di_test']);
     });
     
     test('SomeService', () {
@@ -29,26 +29,31 @@ main() {
   });
 }
 
+@component
 abstract class SomeService {
   String sayHello() => "hello";
 }
 
+@component
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
+@component
 class SomeController {
   @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
+@component
 abstract class InjectedService {
   @inject SomeService someService;
   
   String sayHi() => "hi ";
 }
 
+@component
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }

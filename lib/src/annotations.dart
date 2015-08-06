@@ -1,5 +1,9 @@
 part of drails_di;
 
+/// indicates that the class could be injected into another class or the function
+/// is an AOP proxy
+const component = const Reflectable(invokingCapability, metadataCapability);
+
 /**
  * Indicates that the variable is going to be injected 
  * using the Type as reference

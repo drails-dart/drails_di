@@ -45,7 +45,7 @@ To start the wiring/injection of the components you should call `Application.boo
 library drails_di_test;
 
 import 'package:drails_di/drails_di.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 abstract class SomeService {
   String sayHello() => "hello";
@@ -87,7 +87,7 @@ During unit testing one important feature is mocking components (Create fakes co
 library drails_di_mockito_test;
 
 import 'package:drails_di/drails_di.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
 main() {

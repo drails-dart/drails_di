@@ -42,52 +42,54 @@ part of drails_di;
 ///  
 class AopProxy {
   noSuchMethod(Invocation invocation) {
-    var component = ApplicationContext._componentOfProxy[reflect(this).type.reflectedType];
+    var component_ = ApplicationContext._componentOfProxy[component.reflect(this).type.reflectedType];
     
-    var im = reflect(component);
+    var im = component.reflect(component_);
     
     //Befor aspect begin
-    ApplicationContext._aspectsBefore.keys.where((aspect) =>
-        new GetValueOfAnnotation<Before>().fromDeclaration(aspect).isBefore(component, invocation)
+    ApplicationContext.aspectsBefore.keys.where((aspect) =>
+        new GetValueOfAnnotation<Before>().fromDeclaration(aspect).isBefore(component_, invocation)
     ).forEach((mm) {
-      invocation = ApplicationContext._aspectsBefore[mm].invoke(mm.simpleName, [invocation]).reflectee;
+      invocation = ApplicationContext.aspectsBefore[mm].invoke(mm.simpleName, [invocation]);
     });
     //Befor aspect 
     var retVal;
     
     try {
+      var memberName = dart_mirrors.MirrorSystem.getName(invocation.memberName);
+
       //Invoque method begin
       if(invocation.isGetter)
-        retVal = im.getField(invocation.memberName).reflectee;
+        retVal = im.invokeGetter(memberName);
       else if(invocation.isSetter) {
-        var memberName = MirrorSystem.getName(invocation.memberName).replaceFirst('=', '');
-        retVal = im.setField(new Symbol(memberName), invocation.positionalArguments.first).reflectee;
+        memberName = memberName.replaceFirst('=', '');
+        retVal = im.invokeSetter(memberName, invocation.positionalArguments.first);
       } else
-        retVal = im.invoke(invocation.memberName, invocation.positionalArguments, invocation.namedArguments).reflectee;
+        retVal = im.invoke(memberName, invocation.positionalArguments, invocation.namedArguments);
       //Invoque method end
       
       //After aspect begin
       ApplicationContext._aspectsAfter.keys.where((aspect) =>
-        new GetValueOfAnnotation<After>().fromDeclaration(aspect).isAfter(component, invocation, retVal)
+        new GetValueOfAnnotation<After>().fromDeclaration(aspect).isAfter(component_, invocation, retVal)
       ).forEach((mm) {
-        retVal = ApplicationContext._aspectsAfter[mm].invoke(mm.simpleName, [retVal]).reflectee;
+        retVal = ApplicationContext._aspectsAfter[mm].invoke(mm.simpleName, [retVal]);
       });
       //After aspect end
       
-    } catch(ex, stack) {
+    } catch(ex) {
       //AfterThrowing begin
       ApplicationContext._aspectsAfterThrowing.keys.where((aspect)  =>
-          new GetValueOfAnnotation<AfterThrowing>().fromDeclaration(aspect).isAfterThrowing(component, invocation, ex)
+          new GetValueOfAnnotation<AfterThrowing>().fromDeclaration(aspect).isAfterThrowing(component_, invocation, ex)
       ).forEach((mm) {
-          retVal = ApplicationContext._aspectsAfterThrowing[mm].invoke(mm.simpleName, [retVal, ex]).reflectee;
+          retVal = ApplicationContext._aspectsAfterThrowing[mm].invoke(mm.simpleName, [retVal, ex]);
       });
       //AfterThrowing end
     } finally {
       //AfterFinally begin
       ApplicationContext._aspectsAfterFinally.keys.where((aspect) =>
-        new GetValueOfAnnotation<AfterFinally>().fromDeclaration(aspect).isAfterFinally(component, invocation)
+        new GetValueOfAnnotation<AfterFinally>().fromDeclaration(aspect).isAfterFinally(component_, invocation)
       ).forEach((mm) {
-        retVal = ApplicationContext._aspectsAfterFinally[mm].invoke(mm.simpleName, [retVal]).reflectee;
+        retVal = ApplicationContext._aspectsAfterFinally[mm].invoke(mm.simpleName, [retVal]);
       });
       //AfterFinall end
     }
