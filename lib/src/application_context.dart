@@ -22,11 +22,12 @@ class ApplicationContext {
   /// Contains the Objects with its respectives injected objects. This is useful for global functions or Instances that cannot be 
   /// treated as Injectables
   static Map<Type, Object> components = {};
+  static Map<MethodMirror, LibraryMirror> proxyFunctions = {};
   
   /// Contains a map that link every component to its respective proxy
   static Map<Type, Object> _componentOfProxy = {};
   
-  static Map<MethodMirror, LibraryMirror> aspectsBefore = {};
+  static Map<MethodMirror, LibraryMirror> _aspectsBefore = {};
   static Map<MethodMirror, LibraryMirror> _aspectsAfter = {};
   static Map<MethodMirror, LibraryMirror> _aspectsAfterFinally = {};
   static Map<MethodMirror, LibraryMirror> _aspectsAfterThrowing = {};
@@ -64,20 +65,19 @@ class ApplicationContext {
         }
         if(dm is MethodMirror) {
           if(new IsAnnotation<Before>().onDeclaration(dm)) {
-            aspectsBefore[dm] = incLibrary;
+            _aspectsBefore[dm] = incLibrary;
             return;
-          }
-          if(new IsAnnotation<After>().onDeclaration(dm)) {
+          } else if(new IsAnnotation<After>().onDeclaration(dm)) {
             _aspectsAfter[dm] = incLibrary;
             return;
-          }
-          if(new IsAnnotation<AfterFinally>().onDeclaration(dm)) {
+          } else if(new IsAnnotation<AfterFinally>().onDeclaration(dm)) {
             _aspectsAfterFinally[dm] = incLibrary;
             return;
-          }
-          if(new IsAnnotation<AfterThrowing>().onDeclaration(dm)) {
+          } else if(new IsAnnotation<AfterThrowing>().onDeclaration(dm)) {
             _aspectsAfterThrowing[dm] = incLibrary;
             return;
+          } else {
+            proxyFunctions[dm] = incLibrary;
           }
         }
       });

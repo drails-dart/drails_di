@@ -47,10 +47,10 @@ class AopProxy {
     var im = component.reflect(component_);
     
     //Befor aspect begin
-    ApplicationContext.aspectsBefore.keys.where((aspect) =>
+    ApplicationContext._aspectsBefore.keys.where((aspect) =>
         new GetValueOfAnnotation<Before>().fromDeclaration(aspect).isBefore(component_, invocation)
     ).forEach((mm) {
-      invocation = ApplicationContext.aspectsBefore[mm].invoke(mm.simpleName, [invocation]);
+      invocation = ApplicationContext._aspectsBefore[mm].invoke(mm.simpleName, [invocation]);
     });
     //Befor aspect 
     var retVal;
