@@ -2,7 +2,19 @@ part of drails_di;
 
 /// indicates that the class could be injected into another class or the function
 /// is an AOP proxy
-const component = const Reflectable(invokingCapability, metadataCapability);
+const component = const _Component();
+
+class _Component extends Reflectable {
+  const _Component() : super(
+      invokingCapability,
+      metadataCapability,
+      libraryCapability,
+      declarationsCapability,
+      typeRelationsCapability,
+      typeCapability,
+      topLevelInvokeCapability
+  );
+}
 
 /**
  * Indicates that the variable is going to be injected 
