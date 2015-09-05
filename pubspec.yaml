@@ -4,7 +4,7 @@ author: Luis Vargas <luisvargastijerino@gmail.com>
 description: Drails Dependency Injection Manager
 homepage: https://github.com/luisvt/drails_di
 environment:
-  sdk: '>=1.6.0'
+  sdk: '>=1.8.0'
 dependencies:
   drails_commons: '^0.0.5'
 #  drails_commons:
