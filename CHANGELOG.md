@@ -1,9 +1,13 @@
 # TODO
 
 * Add During Aspect
-* Add priority to AopProies
+* Add priority to AopProxies
 * Add transformer to create AopProxy classes
 * Enhance Documentation
+
+# v0.0.7
+
+* rename `_Component` class to `_Injectable`, user still can use `@component` annotation.
 
 # v0.0.5
 
