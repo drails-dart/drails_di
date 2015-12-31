@@ -45,25 +45,25 @@ main() {
   });
 }
 
-@component
+@injectable
 abstract class SomeService {
   String sayHello() => "hello";
 }
 
-@component
+@injectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
 // we declare the Mock service
-@component
+@injectable
 class SomeServiceMock extends Mock implements SomeService { 
   //this method could be ommited, but I don't like to see the warning.
   noSuchMethod(invocation) =>
     super.noSuchMethod(invocation);
 }
 
-@component
+@injectable
 class SomeController {
   // we inject SomeService instance to SomeController
   @autowired SomeService someService;
@@ -72,7 +72,7 @@ class SomeController {
   String sayHello() => someService.sayHello();
 }
 
-@component
+@injectable
 abstract class InjectedService {
   //
   @inject SomeService someService;
@@ -80,7 +80,7 @@ abstract class InjectedService {
   String sayHi() => "hi ";
 }
 
-@component
+@injectable
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }

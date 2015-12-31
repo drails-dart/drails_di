@@ -29,31 +29,31 @@ main() {
   });
 }
 
-@component
+@injectable
 abstract class SomeService {
   String sayHello() => "hello";
 }
 
-@component
+@injectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
-@component
+@injectable
 class SomeController {
   @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
-@component
+@injectable
 abstract class InjectedService {
   @inject SomeService someService;
   
   String sayHi() => "hi ";
 }
 
-@component
+@injectable
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }

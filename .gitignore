@@ -14,3 +14,6 @@ pubspec.lock
 *.project
 *.iml
 /.settings/**
+.packages
+.pub
+.settings

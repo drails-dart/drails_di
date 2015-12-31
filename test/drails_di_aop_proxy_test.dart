@@ -42,39 +42,39 @@ main() {
   });
 }
 
-@component
+@injectable
 abstract class SomeService {
   String sayHello() => "hello";
   
   throwsError() => throw new Exception("message");
 }
 
-@component
+@injectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
-@component
+@injectable
 class SomeServiceAopProxy extends AopProxy implements SomeService { 
   noSuchMethod(invocation) =>
     super.noSuchMethod(invocation);
 }
 
-@component
+@injectable
 class SomeController {
   @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
-@component
+@injectable
 abstract class InjectedService {
   @inject SomeService someService;
   
   String sayHi() => "hi ";
 }
 
-@component
+@injectable
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }
@@ -85,7 +85,7 @@ bool SomeService_sayHello(component, Invocation inv) =>
     component is SomeService
     && inv.memberName == #sayHello;
 
-@component
+@injectable
 @Before(SomeService_sayHello)
 increaseBeforeCounter(invocation) {
   beforeCounter++;
@@ -98,7 +98,7 @@ var afterCounter = 0;
 someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
     SomeService_sayHello(component, inv);
 
-@component
+@injectable
 @After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
@@ -110,7 +110,7 @@ increaseAfterCounter(retVal) {
 someService_sayHello_retValNull(component, Invocation inv, retVal) =>
     retVal == null && SomeService_sayHello(component, inv);
 
-@component
+@injectable
 @After(someService_sayHello_retValNull)
 noIncreaseAfterCounter(retVal) {
   //this should not happens
@@ -125,7 +125,7 @@ var afterCounter2 = 0;
 someService_sayHello_retVal(component, Invocation inv, retVal) =>
     retVal == "hello impl" && SomeService_sayHello(component, inv);
 
-@component
+@injectable
 @After(someService_sayHello_retVal)
 increaseAfterCounter2(retVal) {
   afterCounter2++;
@@ -141,7 +141,7 @@ SomeService_throwinError(component, Invocation inv, ex) =>
     && component is SomeService
     && inv.memberName == #throwsError;
 
-@component
+@injectable
 @AfterThrowing(SomeService_throwinError)
 increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;

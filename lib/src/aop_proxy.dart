@@ -42,9 +42,9 @@ part of drails_di;
 ///  
 class AopProxy {
   noSuchMethod(Invocation invocation) {
-    var component_ = ApplicationContext._componentOfProxy[component.reflect(this).type.reflectedType];
+    var component_ = ApplicationContext._componentOfProxy[injectable.reflect(this).type.reflectedType];
     
-    var im = component.reflect(component_);
+    var im = injectable.reflect(component_);
     
     //Befor aspect begin
     ApplicationContext._aspectsBefore.keys.where((aspect) =>

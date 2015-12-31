@@ -35,7 +35,7 @@ class ApplicationContext {
   /// Get the controllers from the application Context
   static Iterable<Object> get controllers {
     return components.values.where((component_) => CONTROLLER_NAMES.any((name) =>
-      component.reflect(component_).type.simpleName.endsWith(name))
+      injectable.reflect(component_).type.simpleName.endsWith(name))
     );
   }
 
@@ -56,7 +56,7 @@ class ApplicationContext {
     List<ClassMirror> cms = [];
     
     includedLibs.forEach((incLibraryName) {
-      LibraryMirror incLibrary = component.findLibrary(incLibraryName);
+      LibraryMirror incLibrary = injectable.findLibrary(incLibraryName);
       var dms = incLibrary.declarations.values;
       dms.forEach((dm) {
         if(dm is ClassMirror) {
@@ -124,9 +124,9 @@ class ApplicationContext {
   
   static void _injectComponents() {
     components.values.forEach((component_) {
-      InstanceMirror im = component.reflect(component_);
+      InstanceMirror im = injectable.reflect(component_);
       
-      new GetVariablesAnnotatedWith<_Inject>().from(im, component).forEach((vm) {
+      new GetVariablesAnnotatedWith<_Inject>().from(im, injectable).forEach((vm) {
         _appContextlog.fine(vm.type);
         var injectable = components[vm.type.reflectedType];
         im.invokeSetter(vm.simpleName, injectable);
