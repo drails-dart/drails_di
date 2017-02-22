@@ -1,10 +1,15 @@
 library drails_di;
 
-import 'package:drails_commons/drails_commons.dart';
+import 'dart:mirrors' show MirrorSystem;
+
+import 'package:built_mirrors/built_mirrors.dart';
+import 'package:built_mirrors/scanners.dart';
+import 'package:dson/dson.dart';
+export 'package:dson/dson.dart';
 import 'package:logging/logging.dart';
-import 'dart:mirrors' as dart_mirrors;
-import 'package:reflectable/reflectable.dart';
+
+part 'src/annotations.dart';
+
+part 'src/aop_proxy.dart';
 
 part 'src/application_context.dart';
-part 'src/annotations.dart';
-part 'src/aop_proxy.dart';

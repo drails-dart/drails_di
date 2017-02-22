@@ -3,11 +3,14 @@ library drails_di_aop_proxy_test;
 import 'package:drails_di/drails_di.dart';
 import 'package:test/test.dart';
 
+part 'drails_di_aop_proxy_test.g.dart';
+
 main() {
+  _initMirrors();
   group('AopProxy Test ->', () {
 
     setUp(() {
-      ApplicationContext.bootstrap(['drails_di_aop_proxy_test']);
+      ApplicationContext.bootstrap();
     });
   
     test('SomeService', () {
@@ -19,7 +22,7 @@ main() {
       expect(afterCounter, 1);
       expect(afterCounter2, 1);
       
-      expect(() => someService.throwsError(), throws);
+      expect(() => someService.throwsError(), throwsException);
       expect(afterTrhowingCounter, 1);
       
       SomeController someController = ApplicationContext.components[SomeController];
@@ -28,7 +31,7 @@ main() {
     });
     
     test('InjectedService', () {
-      InjectedService injectedService = extract(InjectedService);
+      InjectedService injectedService = injectorGet(InjectedService);
       
       expect(injectedService is InjectedServiceImpl, true);
       expect(injectedService.someService is SomeServiceAopProxy, true);
@@ -42,39 +45,37 @@ main() {
   });
 }
 
-@injectable
-abstract class SomeService {
+@serializable
+abstract class SomeService extends _$SomeServiceSerializable {
   String sayHello() => "hello";
   
   throwsError() => throw new Exception("message");
 }
 
-@injectable
+@reflectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
 
-@injectable
+@reflectable
 class SomeServiceAopProxy extends AopProxy implements SomeService { 
-  noSuchMethod(invocation) =>
-    super.noSuchMethod(invocation);
 }
 
-@injectable
-class SomeController {
+@serializable
+class SomeController extends _$SomeControllerSerializable {
   @autowired SomeService someService;
   
   String sayHello() => someService.sayHello();
 }
 
-@injectable
-abstract class InjectedService {
+@serializable
+abstract class InjectedService extends _$InjectedServiceSerializable {
   @inject SomeService someService;
   
   String sayHi() => "hi ";
 }
 
-@injectable
+@reflectable
 class InjectedServiceImpl extends InjectedService {
   String sayHi() => super.sayHi() + someService.sayHello(); 
 }
@@ -85,7 +86,7 @@ bool SomeService_sayHello(component, Invocation inv) =>
     component is SomeService
     && inv.memberName == #sayHello;
 
-@injectable
+@reflectable
 @Before(SomeService_sayHello)
 increaseBeforeCounter(invocation) {
   beforeCounter++;
@@ -98,7 +99,7 @@ var afterCounter = 0;
 someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
     SomeService_sayHello(component, inv);
 
-@injectable
+@reflectable
 @After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
@@ -110,7 +111,7 @@ increaseAfterCounter(retVal) {
 someService_sayHello_retValNull(component, Invocation inv, retVal) =>
     retVal == null && SomeService_sayHello(component, inv);
 
-@injectable
+@reflectable
 @After(someService_sayHello_retValNull)
 noIncreaseAfterCounter(retVal) {
   //this should not happens
@@ -125,7 +126,7 @@ var afterCounter2 = 0;
 someService_sayHello_retVal(component, Invocation inv, retVal) =>
     retVal == "hello impl" && SomeService_sayHello(component, inv);
 
-@injectable
+@reflectable
 @After(someService_sayHello_retVal)
 increaseAfterCounter2(retVal) {
   afterCounter2++;
@@ -141,7 +142,7 @@ SomeService_throwinError(component, Invocation inv, ex) =>
     && component is SomeService
     && inv.memberName == #throwsError;
 
-@injectable
+@reflectable
 @AfterThrowing(SomeService_throwinError)
 increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;

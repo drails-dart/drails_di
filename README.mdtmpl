@@ -44,71 +44,7 @@ If you have a third level class that implements or extends SomeService this clas
 
 To start the wiring/injection of the components you should call `Application.bootstrap()`. This method search for every class that ends with `Controller`, `Service`, or `Repository`, then look for the super classes that implements or extends the abstracts or base classes, and finally injects the necessary components to every instantiated class. For example:
 
-```dart
-library drails_di_test;
-
-import 'package:drails_di/drails_di.dart';
-import 'package:dson/dson.dart';
-import 'package:test/test.dart';
-
-part 'drails_di_test.g.dart';
-
-@reflectable
-abstract class SomeService {
-  String sayHello() => "hello";
-}
-
-@reflectable
-class SomeServiceImpl extends SomeService {
-  String sayHello() => "${super.sayHello()} impl";
-}
-
-@serializable
-class SomeController extends _$SomeControllerSerializable {
-  @autowired SomeService someService;
-
-  String sayHello() => someService.sayHello();
-}
-
-@serializable
-abstract class InjectedService extends _$InjectedServiceSerializable {
-  @inject SomeService someService;
-
-  String sayHi() => "hi ";
-}
-
-@reflectable
-class InjectedServiceImpl extends InjectedService {
-  String sayHi() => super.sayHi() + someService.sayHello();
-}
-
-main() {
-  _initMirrors();
-  group('Simple Test ->', () {
-    setUp(() {
-      ApplicationContext.bootstrap();
-    });
-    
-    test('SomeService', () {
-      SomeService someService = injectorGet(SomeService);
-      expect(someService is SomeService, true, reason: 'someService should be SomeService');
-      
-      expect(someService.sayHello(), "hello impl");
-      
-      SomeController someController = injectorGet(SomeController);
-      expect(someController.someService is SomeService, true);
-      
-    });
-    
-    test('InjectedService', () {
-      InjectedService injectedService = injectorGet(InjectedService);
-      expect(injectedService is InjectedServiceImpl, true);
-      expect(injectedService.someService is SomeServiceImpl, true);
-      expect(injectedService.sayHi(), "hi hello impl");
-    });
-  });
-}
-```
+{@example test/drails_di_test.dart}
 
 As you can see in the previous example the first parameter passed to `ApplicationContext.bootstrap` is the symbol of the library where we are going to scan for components. However you can also pass a second parameter call `bind`. This parameter is a map that contains the manual wiring (You are going to see this in action in next section).
 
@@ -118,91 +54,7 @@ As you can see in the previous example the first parameter passed to `Applicatio
 
 During unit testing one important feature is mocking components (Create fakes components that acts as the reals components). In that way we can decouple every stage of the application, and be sure that we are only testing one module at a time. This is specially useful when we call remote web-service or endpoints. In this way our test doesn't depends on third party data that could change during the time making our test invalid. For example:
 
-```dart
-library drails_di_mockito_test;
-
-import 'package:drails_di/drails_di.dart';
-import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
-
-part 'drails_di_mockito_test.g.dart';
-
-@serializable
-abstract class SomeService extends _$SomeServiceSerializable {
-  String sayHello() => "hello";
-}
-
-@reflectable
-class SomeServiceImpl extends SomeService {
-  String sayHello() => "${super.sayHello()} impl";
-}
-
-// we declare the Mock service
-class SomeServiceMock extends Mock implements SomeService {
-}
-
-@serializable
-class SomeController extends _$SomeControllerSerializable {
-  // we inject SomeService instance to SomeController
-  @autowired SomeService someService;
-
-  // this method calls injected someService.sayHello method
-  String sayHello() => someService.sayHello();
-}
-
-@serializable
-abstract class InjectedService extends _$InjectedServiceSerializable {
-  //
-  @inject SomeService someService;
-
-  String sayHi() => "hi ";
-}
-
-@reflectable
-class InjectedServiceImpl extends InjectedService {
-  String sayHi() => super.sayHi() + someService.sayHello();
-}
-
-main() {
-  _initMirrors();
-  group('Mockito Test ->', () {
-    setUp(() {
-      //We initialize the application
-      ApplicationContext.bootstrap(bind: {
-        //bind SomeService Manually, stopping autowiring
-        SomeService: new SomeServiceMock()
-      });
-
-      //extract the Mock service from the ApplicationContext.components map
-      SomeService someService = injectorGet(SomeService);
-      //mock the sayHello Method so we can return a fake value
-      when(someService.sayHello()).thenReturn('hello mock');
-    });
-
-
-    test('SomeService', () {
-      //extract someService from the ApplicationContext.components map
-      SomeService someService = injectorGet(SomeService);
-
-      expect(someService is SomeServiceMock, true, reason: 'someService should be SomeServiceMock');
-
-      expect(someService.sayHello(), "hello mock");
-
-      SomeController someController = injectorGet(SomeController);
-      expect(someController.someService is SomeServiceMock, true);
-    });
-
-    test('InjectedService', () {
-      //extract injectedService from the ApplicationContext.components map
-      InjectedService injectedService = injectorGet(InjectedService);
-      expect(injectedService is InjectedServiceImpl, true);
-      expect(injectedService.someService is SomeServiceMock, true);
-      expect(injectedService.sayHi(), "hi hello mock");
-    });
-  });
-}
-
-```
+{@example test/drails_di_mockito_test.dart}
 
 ## Aspect Oriented Programing
 
@@ -210,10 +62,10 @@ main() {
 
 > http://en.wikipedia.org/wiki/Aspect-oriented_programming
 
-To be able to use AOP with Drails_DI you need to extend the `AopProxy` class and implement the proxied method. For example, let say you have next class:
+To be able to use AOP with Drails_DI you need to extend the `AopProxy` class and implement the proxied method. For example, lets say you have next class:
 
 ```dart
-
+@reflectable
 abstract class SomeService {
   String sayHello() => "hello";
   
@@ -224,6 +76,7 @@ abstract class SomeService {
 and you have an implementation:
 
 ```dart
+@reflectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
@@ -231,9 +84,8 @@ class SomeServiceImpl extends SomeService {
 
 then to make that component interceptable you need to create an `AopProxy` class:
 ```dart
-class SomeServiceAopProxy extends AopProxy implements SomeService { 
-  noSuchMethod(invocation) =>
-    super.noSuchMethod(invocation);
+@reflectable
+class SomeServiceAopProxy extends AopProxy implements SomeService {
 }
 ```
 
@@ -241,7 +93,7 @@ finally you only need to create the aspects/interceptors. To do this you need to
 
 ### Before
 
-Before Aspects should be executed before to the pointCut. For example if I want to intercept the method `SomeService.sayHello` before it occurs, I could do:
+Before Aspects should be executed before to the pointCut. For example if I want to intercept the method `SomeService.sayHello` before it occurs, then I could do:
 
 ```dart
 var beforeCounter = 0;
@@ -252,6 +104,7 @@ bool SomeService_sayHello(component, Invocation inv) =>
     && inv.memberName == #sayHello;
 
 // Aspect
+@reflectable
 @Before(SomeService_sayHello)
 // execution method
 increaseBeforeCounter() {
@@ -274,6 +127,7 @@ var afterCounter = 0;
 someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
     SomeService_sayHello(component, inv);
 
+@reflectable
 @After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
@@ -317,6 +171,7 @@ SomeService_throwinError(component, Invocation inv, ex) =>
     && component is SomeService
     && inv.memberName == #throwsError;
 
+@reflectable
 @AfterThrowing(SomeService_throwinError)
 increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;
@@ -338,6 +193,7 @@ AfterFinally Aspects should be executed after the pointCut has throwed an except
 ```dart
 var afterFinallyCounter = 0;
 
+@reflectable
 @AfterFinally(SomeService_sayHello)
 increaseAfterFinallyCounter(retVal) {
   afterFinallyCounter++;

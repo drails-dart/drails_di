@@ -2,14 +2,18 @@
 
 * Add During Aspect
 * Add priority to AopProxies
-* Add transformer to create AopProxy classes
+* Add generator to create AopProxy classes
 * Enhance Documentation
 
-# v0.0.7
+# 0.1.0
+
+* use `built_mirrors`, `serializable` and `dson` instead `mirrors`
+
+# 0.0.7
 
 * rename `_Component` class to `_Injectable`, user still can use `@component` annotation.
 
-# v0.0.5
+# 0.0.5
 
 * aop_proxy support
   - Before
@@ -17,7 +21,7 @@
   - AfterThrowing
   - AfterFinally
 
-# v0.0.4
+# 0.0.4
 
 * inject by value
 * ability to use [mockito](https://pub.dartlang.org/packages/mockito) with components (services, repositories and controllers)

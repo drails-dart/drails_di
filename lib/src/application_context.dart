@@ -12,124 +12,112 @@ const _COMPONENT_NAMES = const ['Service', 'Repository'];
  * This are global variable that allows users to add their custom name for controllers, Services, and Repositories,
  * for example users could add 'Srvc' for services, 'Ctrlr' for controllers, 'repo' for repositories.
  */
-List<String> CONTROLLER_NAMES = [], COMPONENT_NAMES = [];
+List<String> CONTROLLER_NAMES = [],
+    COMPONENT_NAMES = [];
 
 /// Extract the singleton from the [ApplicationContext]. This is useful for global functions or Instances that cannot be 
 /// treated as Injectables
-Object extract(Type t) => ApplicationContext.components[t];
+T injectorGet<T extends SerializableMap>(Type t) => ApplicationContext.components[t];
 
 class ApplicationContext {
   /// Contains the Objects with its respectives injected objects. This is useful for global functions or Instances that cannot be 
   /// treated as Injectables
-  static Map<Type, Object> components = {};
-  static Map<MethodMirror, LibraryMirror> proxyFunctions = {};
-  
+  static Map<Type, SerializableMap> components = {};
+  static Map<FunctionMirror, Function> proxyFunctions = {};
+
   /// Contains a map that link every component to its respective proxy
   static Map<Type, Object> _componentOfProxy = {};
-  
-  static Map<MethodMirror, LibraryMirror> _aspectsBefore = {};
-  static Map<MethodMirror, LibraryMirror> _aspectsAfter = {};
-  static Map<MethodMirror, LibraryMirror> _aspectsAfterFinally = {};
-  static Map<MethodMirror, LibraryMirror> _aspectsAfterThrowing = {};
+
+  static Map<FunctionMirror, Function> _aspectsBefore = {};
+  static Map<FunctionMirror, Function> _aspectsAfter = {};
+  static Map<FunctionMirror, Function> _aspectsAfterFinally = {};
+  static Map<FunctionMirror, Function> _aspectsAfterThrowing = {};
 
   /// Get the controllers from the application Context
-  static Iterable<Object> get controllers {
-    return components.values.where((component_) => CONTROLLER_NAMES.any((name) =>
-      injectable.reflect(component_).type.simpleName.endsWith(name))
-    );
-  }
+  static Iterable<Object> get controllers =>
+      components.values.where((component_) =>
+          CONTROLLER_NAMES.any((name) => reflect(component_).name.endsWith(name)));
 
-  /// Initialize the application Context. Search into all the libraries [includedLibs] and then
+  /// Initialize the application Context. Search into all the mirrors and then
   /// create an instance of every class that ends with Service, Controller or Repository. Then Inject
-  /// the respectives values to every created class.
-  static void bootstrap(List<String> includedLibs, {Map<Type, Object> bind}) {
+  /// the respective values to every created class.
+  static void bootstrap({Map<Type, Object> bind}) {
     // clear components for multiple initialization when unit testing
     components.clear();
-    
-    if(bind != null) {
+
+    if (bind != null) {
       components.addAll(bind);
     }
-    
+
     CONTROLLER_NAMES.addAll(_CONTROLLER_NAMES);
     COMPONENT_NAMES..addAll(_COMPONENT_NAMES)..addAll(CONTROLLER_NAMES);
-    
-    List<ClassMirror> cms = [];
-    
-    includedLibs.forEach((incLibraryName) {
-      LibraryMirror incLibrary = injectable.findLibrary(incLibraryName);
-      var dms = incLibrary.declarations.values;
-      dms.forEach((dm) {
-        if(dm is ClassMirror) {
-          cms.add(dm);
+
+    functionMirrors.forEach((function, fm) {
+      for (var a in fm.annotations) {
+        if (a is Before) {
+          _aspectsBefore[fm] = function;
           return;
+        } else if (a is After) {
+          _aspectsAfter[fm] = function;
+          return;
+        } else if (a is AfterFinally) {
+          _aspectsAfterFinally[fm] = function;
+          return;
+        } else if (a is AfterThrowing) {
+          _aspectsAfterThrowing[fm] = function;
+          return;
+        } else {
+          proxyFunctions[fm] = function;
         }
-        if(dm is MethodMirror) {
-          if(new IsAnnotation<Before>().onDeclaration(dm)) {
-            _aspectsBefore[dm] = incLibrary;
-            return;
-          } else if(new IsAnnotation<After>().onDeclaration(dm)) {
-            _aspectsAfter[dm] = incLibrary;
-            return;
-          } else if(new IsAnnotation<AfterFinally>().onDeclaration(dm)) {
-            _aspectsAfterFinally[dm] = incLibrary;
-            return;
-          } else if(new IsAnnotation<AfterThrowing>().onDeclaration(dm)) {
-            _aspectsAfterThrowing[dm] = incLibrary;
-            return;
-          } else {
-            proxyFunctions[dm] = incLibrary;
-          }
-        }
-      });
+      }
     });
-    
+
     var proxyOfComponent = {};
 
     /// Contains the proxies of the components
     Map<Type, Object> proxies = {};
 
-    cms.where((dm) =>
-      dm.simpleName.endsWith('AopProxy')
-    ).forEach((ClassMirror injectableProxyCm) {
-        var componentType = injectableProxyCm.superinterfaces.first.reflectedType;
-        proxies[componentType] = injectableProxyCm.newInstance('', []);
-        proxyOfComponent[componentType] = injectableProxyCm.reflectedType;
+    classMirrors.forEach((type, cm) {
+      if (cm.name.endsWith('AopProxy')) {
+        var componentType = cm.superinterfaces.first;
+        proxies[componentType] = cm.constructors[''].call({});
+        proxyOfComponent[componentType] = type;
+      }
     });
-    
-    //Get Components' instances
-    cms.where((dm) => 
-      COMPONENT_NAMES.any((name) => dm.simpleName.endsWith(name))
-    ).forEach((ClassMirror injectableCm) {
-      var componentType = injectableCm.reflectedType;
-      
-      if(components[componentType] == null) {
-        if(proxies[componentType] != null) {
-          
-          components[componentType] = proxies[injectableCm.reflectedType];
-          _componentOfProxy[proxyOfComponent[componentType]] = injectableCm.isAbstract 
-              ? getObjectThatExtend(injectableCm, cms)
-              : injectableCm.newInstance('', []);
-        } else {
-          components[componentType] = injectableCm.isAbstract 
-                ? getObjectThatExtend(injectableCm, cms)
-                : injectableCm.newInstance('', []);
+
+    classMirrors.forEach((type, cm) {
+      //Get Components' instances
+      if (COMPONENT_NAMES.any((name) => cm.name.endsWith(name))) {
+        if (components[type] == null) {
+          if (proxies[type] != null) {
+            components[type] = proxies[type];
+            _componentOfProxy[proxyOfComponent[type]] = cm.isAbstract
+                ? getObjectThatExtend(cm)
+                : cm.constructors[''].call({});
+          } else {
+            components[type] = cm.isAbstract
+                ? getObjectThatExtend(cm)
+                : cm.constructors[''].call({});
+          }
         }
       }
     });
-    
+
     _appContextlog.fine('components: $components');
-    
+
     _injectComponents();
   }
-  
+
   static void _injectComponents() {
-    components.values.forEach((component_) {
-      InstanceMirror im = injectable.reflect(component_);
-      
-      new GetVariablesAnnotatedWith<_Inject>().from(im, injectable).forEach((vm) {
-        _appContextlog.fine(vm.type);
-        var injectable = components[vm.type.reflectedType];
-        im.invokeSetter(vm.simpleName, injectable);
+    components.forEach((type, component_) {
+      ClassMirror cm = reflectType(type);
+
+      cm.fields?.forEach((name, fieldMirror) {
+        if (fieldMirror.annotations.any(new Is<_Inject>())) {
+          _appContextlog.fine(fieldMirror.type);
+          var injectable = components[fieldMirror.type];
+          component_[name] = injectable;
+        }
       });
     });
   }
