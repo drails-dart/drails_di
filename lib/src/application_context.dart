@@ -15,12 +15,12 @@ const _COMPONENT_NAMES = const ['Service', 'Repository'];
 List<String> CONTROLLER_NAMES = [],
     COMPONENT_NAMES = [];
 
-/// Extract the singleton from the [ApplicationContext]. This is useful for global functions or Instances that cannot be 
+/// Extract the singleton from the [ApplicationContext]. This is useful for global functions or Instances that cannot be
 /// treated as Injectables
 T injectorGet<T extends SerializableMap>(Type t) => ApplicationContext.components[t];
 
 class ApplicationContext {
-  /// Contains the Objects with its respectives injected objects. This is useful for global functions or Instances that cannot be 
+  /// Contains the Objects with its respectives injected objects. This is useful for global functions or Instances that cannot be
   /// treated as Injectables
   static Map<Type, SerializableMap> components = {};
   static Map<FunctionMirror, Function> proxyFunctions = {};
@@ -34,7 +34,7 @@ class ApplicationContext {
   static Map<FunctionMirror, Function> _aspectsAfterThrowing = {};
 
   /// Get the controllers from the application Context
-  static Iterable<Object> get controllers =>
+  static Iterable<SerializableMap> get controllers =>
       components.values.where((component_) =>
           CONTROLLER_NAMES.any((name) => reflect(component_).name.endsWith(name)));
 
@@ -80,7 +80,7 @@ class ApplicationContext {
     classMirrors.forEach((type, cm) {
       if (cm.name.endsWith('AopProxy')) {
         var componentType = cm.superinterfaces.first;
-        proxies[componentType] = cm.constructors[''].call({});
+        proxies[componentType] = cm.constructors['']();
         proxyOfComponent[componentType] = type;
       }
     });
@@ -93,11 +93,11 @@ class ApplicationContext {
             components[type] = proxies[type];
             _componentOfProxy[proxyOfComponent[type]] = cm.isAbstract
                 ? getObjectThatExtend(cm)
-                : cm.constructors[''].call({});
+                : cm.constructors['']();
           } else {
             components[type] = cm.isAbstract
                 ? getObjectThatExtend(cm)
-                : cm.constructors[''].call({});
+                : cm.constructors['']();
           }
         }
       }
@@ -113,7 +113,7 @@ class ApplicationContext {
       ClassMirror cm = reflectType(type);
 
       cm.fields?.forEach((name, fieldMirror) {
-        if (fieldMirror.annotations.any(new Is<_Inject>())) {
+        if (fieldMirror.annotations?.any(new Is<_Inject>()) == true) {
           _appContextlog.fine(fieldMirror.type);
           var injectable = components[fieldMirror.type];
           component_[name] = injectable;

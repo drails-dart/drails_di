@@ -5,6 +5,10 @@
 * Add generator to create AopProxy classes
 * Enhance Documentation
 
+# 0.2.0
+
+- upgrade to `dson@^0.10.0`
+
 # 0.1.0
 
 * use `built_mirrors`, `serializable` and `dson` instead `mirrors`

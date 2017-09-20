@@ -210,10 +210,10 @@ main() {
 
 > http://en.wikipedia.org/wiki/Aspect-oriented_programming
 
-To be able to use AOP with Drails_DI you need to extend the `AopProxy` class and implement the proxied method. For example, let say you have next class:
+To be able to use AOP with Drails_DI you need to extend the `AopProxy` class and implement the proxied method. For example, lets say you have next class:
 
 ```dart
-
+@reflectable
 abstract class SomeService {
   String sayHello() => "hello";
   
@@ -224,6 +224,7 @@ abstract class SomeService {
 and you have an implementation:
 
 ```dart
+@reflectable
 class SomeServiceImpl extends SomeService {
   String sayHello() => "${super.sayHello()} impl";
 }
@@ -231,9 +232,8 @@ class SomeServiceImpl extends SomeService {
 
 then to make that component interceptable you need to create an `AopProxy` class:
 ```dart
-class SomeServiceAopProxy extends AopProxy implements SomeService { 
-  noSuchMethod(invocation) =>
-    super.noSuchMethod(invocation);
+@reflectable
+class SomeServiceAopProxy extends AopProxy implements SomeService {
 }
 ```
 
@@ -241,7 +241,7 @@ finally you only need to create the aspects/interceptors. To do this you need to
 
 ### Before
 
-Before Aspects should be executed before to the pointCut. For example if I want to intercept the method `SomeService.sayHello` before it occurs, I could do:
+Before Aspects should be executed before to the pointCut. For example if I want to intercept the method `SomeService.sayHello` before it occurs, then I could do:
 
 ```dart
 var beforeCounter = 0;
@@ -252,6 +252,7 @@ bool SomeService_sayHello(component, Invocation inv) =>
     && inv.memberName == #sayHello;
 
 // Aspect
+@reflectable
 @Before(SomeService_sayHello)
 // execution method
 increaseBeforeCounter() {
@@ -274,6 +275,7 @@ var afterCounter = 0;
 someService_sayHello_noRetVal(component, Invocation inv, retVal) =>
     SomeService_sayHello(component, inv);
 
+@reflectable
 @After(someService_sayHello_noRetVal)
 increaseAfterCounter(retVal) {
   afterCounter++;
@@ -317,6 +319,7 @@ SomeService_throwinError(component, Invocation inv, ex) =>
     && component is SomeService
     && inv.memberName == #throwsError;
 
+@reflectable
 @AfterThrowing(SomeService_throwinError)
 increaseAfterThrowingCounter(retVal, Exception ex) {
   afterTrhowingCounter++;
@@ -338,6 +341,7 @@ AfterFinally Aspects should be executed after the pointCut has throwed an except
 ```dart
 var afterFinallyCounter = 0;
 
+@reflectable
 @AfterFinally(SomeService_sayHello)
 increaseAfterFinallyCounter(retVal) {
   afterFinallyCounter++;

@@ -1,15 +1,20 @@
 name: drails_di
-version: 0.1.0
+version: 0.2.0
 author: Luis Vargas <luisvargastijerino@gmail.com>
 description: Drails Dependency Injection Manager
 homepage: https://github.com/luisvt/drails_di
 environment:
-  sdk: '>=1.12.0'
+  sdk: '>=1.12.0 <2.0.0'
 dependencies:
-  mockito: '^0.10.1'
-  dson: '^0.5.0+1'
+  logging: ^0.11.3
+  build_runner: ^0.4.0
+  built_mirrors: ^0.6.0
+  dson: ^0.10.0
+#  dson:
+#    path: ../dson
 #dependency_overrides:
 #  built_mirrors:
 #    path: ../built_mirrors
 dev_dependencies:
-  test: '^0.12.19+1'
+  test: ^0.12.19+1
+  mockito: ^2.2.0
