@@ -5,6 +5,10 @@
 * Add generator to create AopProxy classes
 * Enhance Documentation
 
+# 0.3.0
+
+- upgrade to `dson@^0.13.0`
+
 # 0.2.0
 
 - upgrade to `dson@^0.10.0`

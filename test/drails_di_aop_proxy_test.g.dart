@@ -106,7 +106,7 @@ _SomeServiceImpl__Constructor([positionalParams, namedParams]) =>
 const SomeServiceImplClassMirror = const ClassMirror(
     name: 'SomeServiceImpl',
     constructors: const {
-      '': const FunctionMirror($call: _SomeServiceImpl__Constructor)
+      '': const FunctionMirror(name: '', $call: _SomeServiceImpl__Constructor)
     },
     methods: const {
       'sayHello': const FunctionMirror(
@@ -125,7 +125,8 @@ _SomeServiceAopProxy__Constructor([positionalParams, namedParams]) =>
 const SomeServiceAopProxyClassMirror = const ClassMirror(
     name: 'SomeServiceAopProxy',
     constructors: const {
-      '': const FunctionMirror($call: _SomeServiceAopProxy__Constructor)
+      '': const FunctionMirror(
+          name: '', $call: _SomeServiceAopProxy__Constructor)
     },
     methods: const {
       'noSuchMethod': const FunctionMirror(
@@ -150,12 +151,12 @@ const SomeServiceAopProxyClassMirror = const ClassMirror(
 _SomeController__Constructor([positionalParams, namedParams]) =>
     new SomeController();
 
-const $$SomeController_fields_someService =
-    const DeclarationMirror(type: SomeService, annotations: const [autowired]);
+const $$SomeController_fields_someService = const DeclarationMirror(
+    name: 'someService', type: SomeService, annotations: const [autowired]);
 
 const SomeControllerClassMirror =
     const ClassMirror(name: 'SomeController', constructors: const {
-  '': const FunctionMirror($call: _SomeController__Constructor)
+  '': const FunctionMirror(name: '', $call: _SomeController__Constructor)
 }, fields: const {
   'someService': $$SomeController_fields_someService
 }, getters: const [
@@ -169,8 +170,8 @@ const SomeControllerClassMirror =
   )
 });
 
-const $$InjectedService_fields_someService =
-    const DeclarationMirror(type: SomeService, annotations: const [inject]);
+const $$InjectedService_fields_someService = const DeclarationMirror(
+    name: 'someService', type: SomeService, annotations: const [inject]);
 
 const InjectedServiceClassMirror = const ClassMirror(
     name: 'InjectedService',
@@ -190,7 +191,8 @@ _InjectedServiceImpl__Constructor([positionalParams, namedParams]) =>
 const InjectedServiceImplClassMirror = const ClassMirror(
     name: 'InjectedServiceImpl',
     constructors: const {
-      '': const FunctionMirror($call: _InjectedServiceImpl__Constructor)
+      '': const FunctionMirror(
+          name: '', $call: _InjectedServiceImpl__Constructor)
     },
     fields: const {'someService': $$InjectedService_fields_someService},
     getters: const ['someService'],

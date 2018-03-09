@@ -2,8 +2,7 @@ library drails_di;
 
 import 'dart:mirrors' show MirrorSystem;
 
-import 'package:built_mirrors/built_mirrors.dart';
-import 'package:built_mirrors/scanners.dart';
+import 'package:built_mirrors_core/scanners.dart';
 import 'package:dson/dson.dart';
 export 'package:dson/dson.dart';
 import 'package:logging/logging.dart';
