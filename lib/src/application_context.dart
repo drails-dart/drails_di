@@ -53,23 +53,15 @@ class ApplicationContext {
     COMPONENT_NAMES..addAll(_COMPONENT_NAMES)..addAll(CONTROLLER_NAMES);
 
     functionMirrors.forEach((function, fm) {
-      for (var a in fm.annotations) {
-        if (a is Before) {
-          _aspectsBefore[fm] = function;
-          return;
-        } else if (a is After) {
-          _aspectsAfter[fm] = function;
-          return;
-        } else if (a is AfterFinally) {
-          _aspectsAfterFinally[fm] = function;
-          return;
-        } else if (a is AfterThrowing) {
-          _aspectsAfterThrowing[fm] = function;
-          return;
-        } else {
-          proxyFunctions[fm] = function;
-        }
-      }
+      var noAspect = false;
+      fm.annotations?.forEach((a) {
+        if (a is Before) _aspectsBefore[fm] = function;
+        else if (a is After) _aspectsAfter[fm] = function;
+        else if (a is AfterFinally) _aspectsAfterFinally[fm] = function;
+        else if (a is AfterThrowing) _aspectsAfterThrowing[fm] = function;
+        else noAspect = true;
+      });
+      if (noAspect || fm.annotations == null) proxyFunctions[fm] = function;
     });
 
     var proxyOfComponent = {};

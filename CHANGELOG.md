@@ -5,6 +5,10 @@
 * Add generator to create AopProxy classes
 * Enhance Documentation
 
+# 0.3.1
+
+- correct adding proxy function when there is no annotations
+
 # 0.3.0
 
 - upgrade to `dson@^0.13.0`
